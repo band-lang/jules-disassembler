@@ -55,3 +55,26 @@ The README.md must contain:
 - Commit regularly with meaningful commit messages
 - When the project is complete and all tests pass, open a pull request from `dev` into `main`
 - Work completely autonomously. Do not wait for approval. Do not ask questions. Implement, test, document, and submit.
+
+## Build Instructions
+To build the library and run tests, simply run:
+```bash
+make
+./test
+```
+This will compile the `jules_disasm` static library (`libjules_disasm.a`) and link it to the test binary.
+
+## Supported Instruction Set
+The disassembler supports the following x86-64 instructions:
+- `MOV`, `ADD`, `SUB`, `AND`, `OR`, `XOR`, `CMP`, `INC`, `DEC`, `MUL`, `DIV`, `PUSH`, `POP`, `CALL`, `RET`, `JMP`, `JE`, `JNE`, `JL`, `JG`, `JLE`, `JGE`, `NOP`, `LEA`, `IDIV`, `IMUL`, `NOT`, `NEG`, `TEST`
+
+## Architecture Overview
+The disassembler is structured into three main modules:
+1.  **Decoder (`decoder.c`)**: Parses raw instruction bytes, handling prefixes (REX, operand size override, etc.), opcodes, ModR/M bytes, SIB bytes, displacements, and immediates. It populates an internal `jd_decoded_inst_t` structure containing the extracted mnemonic, operands (registers, memory access details, immediates), and metadata (instruction length).
+2.  **Formatter (`formatter.c`)**: Takes the decoded `jd_decoded_inst_t` structure and formats it into a human-readable assembly string, properly handling register names based on size, memory pointer sizes (e.g., `dword ptr`), offsets, and addressing modes (e.g., base + index * scale + disp).
+3.  **Public API (`jules_disasm.c`)**: Provides a unified entry point, `jd_disassemble()`, which orchestrates the decoding and formatting processes to return the disassembled string and instruction length to the user.
+
+## Known Limitations
+- The disassembler is designed to support a substantial subset of x86-64 instructions commonly found in integer code, but it does not support floating-point (x87), MMX, SSE, AVX, or other vector instruction sets.
+- While basic prefix handling is implemented, more complex prefix interactions (like multiple REP prefixes or segment overrides) may not be fully supported.
+- ModR/M and SIB decoding assumes standard encodings; highly unusual or undocumented encodings may not be handled correctly.
