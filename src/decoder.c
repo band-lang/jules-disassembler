@@ -238,6 +238,11 @@ jd_status_t decode_instruction(const uint8_t *buffer, size_t buffer_size, jd_dec
         offset++;
         if (offset >= buffer_size) return JD_ERR_INCOMPLETE_INSTRUCTION;
         uint8_t op2 = buffer[offset++];
+        if (op2 == 0x05) { // SYSCALL
+            inst->mnem = MNEM_SYSCALL;
+            inst->length = offset;
+            return JD_SUCCESS;
+        }
         if (op2 >= 0x80 && op2 <= 0x8F) {
             jd_mnem_t jcc_map[] = { MNEM_NONE, MNEM_NONE, MNEM_NONE, MNEM_NONE, MNEM_JE, MNEM_JNE, MNEM_NONE, MNEM_NONE, MNEM_NONE, MNEM_NONE, MNEM_NONE, MNEM_NONE, MNEM_JL, MNEM_JGE, MNEM_JLE, MNEM_JG };
             inst->mnem = jcc_map[op2 - 0x80];
